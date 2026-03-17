@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ARIA — Your Personal AI Assistant powered by OpenRouter">
+  <title>ARIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+  <div class="app" id="app">
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="14" stroke="url(#grad)" stroke-width="2.5" />
+              <path d="M10 20 L16 10 L22 20" stroke="url(#grad)" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <circle cx="16" cy="14" r="2" fill="url(#grad)" />
+              <defs>
+                <linearGradient id="grad" x1="0" y1="0" x2="32" y2="32">
+                  <stop offset="0%" stop-color="#8B5CF6" />
+                  <stop offset="100%" stop-color="#06B6D4" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span class="logo-text">ARIA</span>
+        </div>
+        <button class="btn-icon sidebar-toggle" id="sidebarToggle" title="Close sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18" />
+          </svg>
+        </button>
+      </div>
+
+      <button class="btn-new-chat" id="btnNewChat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        <span>New Chat</span>
+      </button>
+
+      <!-- Sidebar History (inline) -->
+      <div class="sidebar-history" id="sidebarHistory">
+        <!-- History items rendered here by JS -->
+      </div>
+
+      <!-- Bottom Nav Rail -->
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-panel="chat" id="navChat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <span>Chat</span>
+        </button>
+        <button class="nav-item" data-panel="skills" id="navSkills">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          <span>Skills</span>
+        </button>
+        <button class="nav-item" data-panel="memory" id="navMemory">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          <span>Memory</span>
+        </button>
+        <button class="nav-item" data-panel="automations" id="navAutomations">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <span>Automations</span>
+        </button>
+        <button class="nav-item" data-panel="usage" id="navUsage">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+            <path d="M22 12A10 10 0 0 0 12 2v10z" />
+          </svg>
+          <span>Usage</span>
+        </button>
+        <button class="nav-item" data-panel="settings" id="navSettings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+          </svg>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-indicator" id="statusIndicator">
+          <span class="status-dot"></span>
+          <span class="status-text">Ready</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+      <!-- Mobile Header -->
+      <div class="mobile-header" id="mobileHeader" style="display:none; padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--bg-secondary);">
+        <button class="btn-icon" id="mobileMenuBtn" title="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Chat Panel -->
+      <div class="panel panel-chat active" id="panelChat">
+        <div class="chat-header">
+          <h1 class="chat-title" id="chatTitle"></h1>
+          <div class="chat-header-actions">
+            <span class="model-badge" id="modelBadge">No model</span>
+            <span class="model-badge fallback-badge" id="fallbackBadge" style="display:none;">⟳ No fallback</span>
+          </div>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="welcome-screen" id="welcomeScreen">
+            <div class="welcome-icon">
+              <svg viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="28" stroke="url(#wgrad)" stroke-width="3" />
+                <path d="M20 40 L32 20 L44 40" stroke="url(#wgrad)" stroke-width="3" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <circle cx="32" cy="28" r="4" fill="url(#wgrad)" />
+                <defs>
+                  <linearGradient id="wgrad" x1="0" y1="0" x2="64" y2="64">
+                    <stop offset="0%" stop-color="#8B5CF6" />
+                    <stop offset="100%" stop-color="#06B6D4" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <h2>What can I help with?</h2>
+            <p>I can execute commands, manage files, browse the web, remember things, and automate tasks for you.</p>
+            <div class="welcome-suggestions">
+              <button class="suggestion-chip" data-msg="What files are in my Documents folder?">📁 Browse my
+                files</button>
+              <button class="suggestion-chip" data-msg="What's the latest news in AI?">🌐 Search the web</button>
+              <button class="suggestion-chip" data-msg="Tell me about your capabilities">⚡ Your capabilities</button>
+              <button class="suggestion-chip" data-msg="Check my system information">💻 System info</button>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-container">
+          <div class="chat-input-wrapper">
+            <textarea class="chat-input" id="chatInput" placeholder="Message ARIA..." rows="1"></textarea>
+            <button class="btn-send" id="btnSend" title="Send message">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Panel -->
+      <div class="panel panel-history" id="panelHistory">
+        <div class="panel-header">
+          <h1>Chat History</h1>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" id="historySearch" placeholder="Search conversations...">
+          </div>
+        </div>
+        <div class="history-list" id="historyList">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <p>No conversations yet</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Panel -->
+      <div class="panel panel-skills" id="panelSkills">
+        <div class="panel-header">
+          <h1>Skills</h1>
+          <button class="btn-primary" id="btnNewSkill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            New Skill
+          </button>
+        </div>
+        <div class="skills-list" id="skillsList">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <p>No skills created yet</p>
+            <span>Skills are reusable code blocks that extend ARIA's capabilities</span>
+          </div>
+        </div>
+        <!-- Skill Editor Modal -->
+        <div class="modal-overlay" id="skillModal">
+          <div class="modal">
+            <div class="modal-header">
+              <h2>Create Skill</h2>
+              <button class="btn-icon modal-close" id="skillModalClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="skillName">Name</label>
+                <input type="text" id="skillName" placeholder="e.g., cleanup_downloads">
+              </div>
+              <div class="form-group">
+                <label for="skillDescription">Description</label>
+                <input type="text" id="skillDescription" placeholder="What does this skill do?">
+              </div>
+              <div class="form-group">
+                <label for="skillCode">Code (JavaScript)</label>
+                <textarea id="skillCode" class="code-editor" rows="10"
+                  placeholder="// Use executeTool() to call ARIA's tools&#10;// Example:&#10;const result = await executeTool('list_directory', { dir_path: 'C:\\' });&#10;console.log(result);"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-secondary" id="skillModalCancel">Cancel</button>
+              <button class="btn-primary" id="skillModalSave">Create Skill</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Memory Panel -->
+      <div class="panel panel-memory" id="panelMemory">
+        <div class="panel-header">
+          <h1>Memory</h1>
+          <button class="btn-primary" id="btnNewMemory">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Add Memory
+          </button>
+        </div>
+        <div class="memory-filters" id="memoryFilters">
+          <button class="filter-chip active" data-category="">All</button>
+          <button class="filter-chip" data-category="preference">Preferences</button>
+          <button class="filter-chip" data-category="fact">Facts</button>
+          <button class="filter-chip" data-category="note">Notes</button>
+          <button class="filter-chip" data-category="task">Tasks</button>
+          <button class="filter-chip" data-category="general">General</button>
+        </div>
+        <div class="memory-list" id="memoryList">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z" />
+              <circle cx="12" cy="9" r="2.5" />
+            </svg>
+            <p>No memories yet</p>
+            <span>ARIA remembers important information from your conversations</span>
+          </div>
+        </div>
+        <!-- Memory Modal -->
+        <div class="modal-overlay" id="memoryModal">
+          <div class="modal">
+            <div class="modal-header">
+              <h2>Add Memory</h2>
+              <button class="btn-icon modal-close" id="memoryModalClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="memoryKey">Label</label>
+                <input type="text" id="memoryKey" placeholder="e.g., Favorite color">
+              </div>
+              <div class="form-group">
+                <label for="memoryContent">Content</label>
+                <textarea id="memoryContent" rows="3" placeholder="What should ARIA remember?"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="memoryCategory">Category</label>
+                <select id="memoryCategory">
+                  <option value="general">General</option>
+                  <option value="preference">Preference</option>
+                  <option value="fact">Fact</option>
+                  <option value="note">Note</option>
+                  <option value="task">Task</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-secondary" id="memoryModalCancel">Cancel</button>
+              <button class="btn-primary" id="memoryModalSave">Save Memory</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Automations Panel -->
+      <div class="panel panel-automations" id="panelAutomations">
+        <div class="panel-header">
+          <h1>Automations</h1>
+          <button class="btn-primary" id="btnNewAutomation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            New Automation
+          </button>
+        </div>
+        <div class="automations-list" id="automationsList">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            <p>No automations yet</p>
+            <span>Schedule recurring tasks for ARIA to execute automatically</span>
+          </div>
+        </div>
+        <!-- Automation Modal -->
+        <div class="modal-overlay" id="automationModal">
+          <div class="modal">
+            <div class="modal-header">
+              <h2>Create Automation</h2>
+              <button class="btn-icon modal-close" id="automationModalClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="autoName">Name</label>
+                <input type="text" id="autoName" placeholder="e.g., Daily cleanup">
+              </div>
+              <div class="form-group">
+                <label for="autoDescription">Description</label>
+                <input type="text" id="autoDescription" placeholder="What does this automation do?">
+              </div>
+              <div class="form-group">
+                <label for="autoCron">Cron Schedule</label>
+                <input type="text" id="autoCron" placeholder="e.g., 0 9 * * * (daily at 9am)">
+                <div class="form-hint">Format: minute hour day month weekday</div>
+              </div>
+              <div class="form-group">
+                <label for="autoPrompt">Prompt</label>
+                <textarea id="autoPrompt" rows="3"
+                  placeholder="What should ARIA do? (written as a chat message)"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-secondary" id="automationModalCancel">Cancel</button>
+              <button class="btn-primary" id="automationModalSave">Create</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage Panel -->
+      <div class="panel panel-usage" id="panelUsage">
+        <div class="panel-header">
+          <h1>API Usage & Credits</h1>
+          <button class="btn-secondary" id="btnRefreshUsage">Refresh Data</button>
+        </div>
+        <div class="usage-content" id="usageContent" style="padding: 24px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <p>Loading OpenRouter usage and credit limits...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Panel -->
+      <div class="panel panel-settings" id="panelSettings">
+        <div class="panel-header">
+          <h1>Settings</h1>
+        </div>
+        <div class="settings-content">
+          <div class="settings-section">
+            <h2>OpenRouter API</h2>
+            <div class="form-group">
+              <label for="settingsApiKey">API Key</label>
+              <div class="input-with-action">
+                <input type="password" id="settingsApiKey" placeholder="sk-or-...">
+                <button class="btn-secondary" id="btnSaveApiKey">Save</button>
+              </div>
+              <div class="form-hint">Get your key at <a href="https://openrouter.ai/keys"
+                  target="_blank">openrouter.ai/keys</a></div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h2>Models</h2>
+            <div class="form-group">
+              <label for="settingsModel">⭐ Primary Model</label>
+              <div class="input-with-action">
+                <select id="settingsModel">
+                  <option value="">Loading models...</option>
+                </select>
+                <button class="btn-secondary" id="btnRefreshModels">Refresh</button>
+              </div>
+              <div class="form-hint">The main model ARIA uses for all conversations</div>
+            </div>
+            <div class="form-group" style="margin-top:18px;">
+              <label for="settingsFallbackModel">🔄 Fallback Model</label>
+              <div class="input-with-action">
+                <select id="settingsFallbackModel">
+                  <option value="">None (no fallback)</option>
+                </select>
+              </div>
+              <div class="form-hint">Used automatically if the primary model fails or is unavailable</div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h2>About</h2>
+            <div class="about-info">
+              <p><strong>ARIA</strong> — AI Reasoning & Intelligent Assistant</p>
+              <p>Version 1.0.0 • Powered by OpenRouter</p>
+              <p class="about-features">Capabilities: Shell execution • File management • Web browsing • Persistent
+                memory • Skills • Automations</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal modal-sm">
+      <div class="modal-body" style="padding: 30px 24px; text-align: center;">
+        <div style="font-size: 40px; margin-bottom: 16px;">⚠️</div>
+        <p id="confirmMessage" style="font-size: 15px; margin-bottom: 24px; color: var(--text-primary); line-height: 1.5;"></p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button class="btn-secondary" id="confirmCancel">Cancel</button>
+          <button class="btn-danger" id="confirmOk" style="padding: 9px 18px;">Yes, Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="/js/markdown.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/chat.js"></script>
+  <script src="/js/history.js"></script>
+  <script src="/js/skills.js"></script>
+  <script src="/js/memory.js"></script>
+  <script src="/js/automations.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/usage.js"></script>
+</body>
+
+</html>
