@@ -19,6 +19,7 @@ ARIA is a highly customizable, real-time AI assistant that acts as a secure fron
 *   **Real-time AI Chat**: Blazing fast WebSocket-powered streaming for a "live typing" experience.
 *   **Custom Skills** (in dev): Write JavaScript snippets directly in the UI. ARIA can autonomously trigger these skills based on your conversation.
 *   **Automations** (in dev): Schedule cron-based tasks (e.g., Daily Summaries at 9 AM) that run securely in the background.
+*   **Image and Video support** (in dev): Supports image and video generation from supported models
 *   **Persistent Memory**: ARIA remembers facts, preferences, and past context using a dedicated long-term memory system.
 *   **Local & Secure Data**: Everything (conversations, memories, skills) lives locally in a SQLite database.
 *   **Usage Tracking**: Monitor your OpenRouter token usage and costs directly from the dashboard.
